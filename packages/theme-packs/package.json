@@ -33,7 +33,7 @@
   "scripts": {
     "sync-skins-css": "node ./scripts/sync-skins-css.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "echo \"ok\"",
+    "test": "node ./scripts/sync-skins-css.mjs --check",
     "build": "echo \"ok\""
   },
   "peerDependencies": {

@@ -8,6 +8,7 @@ export {
   bandwidthLimitBytes,
   customDomainLimit,
   canUseCustomDomains,
+  canUseCustomHtml,
   seatLimit,
   formatBytes,
   priceForInterval,

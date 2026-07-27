@@ -10,6 +10,7 @@ import {
   type PageDocument,
 } from "./types";
 import type { ParseDocumentResult } from "./parse";
+import { sanitizeCustomHtml } from "./sanitize-custom-html";
 
 function escapeHtml(s: string): string {
   return String(s)
@@ -245,7 +246,7 @@ function blockToHtml(block: Block): string {
 
 /**
  * Parse a small HTML subset into a page document.
- * Supported: h1–h3, p, img, a, a.btn, ul/ol, hr, blockquote, section, nav[data-nav-links], div[data-columns], div[data-spacer], form[data-kumooo-form], span[data-badge], aside[data-callout], div[data-video], div[data-embed], div[data-feature], nav[data-social-links].
+ * Supported: h1–h3, p, img, a, a.btn, ul/ol, hr, blockquote, section, nav[data-nav-links], div[data-columns], div[data-spacer], form[data-kumooo-form], span[data-badge], aside[data-callout], div[data-video], div[data-embed], div[data-feature], nav[data-social-links], div[data-custom-html].
  */
 export function parseHtmlDocument(raw: string): ParseDocumentResult {
   const html = String(raw ?? "").trim();
@@ -374,6 +375,13 @@ function parseVoid(name: string, openTag: string): Block | null {
 }
 
 function parseElement(name: string, openTag: string, inner: string): Block | null {
+  if (name === "div" && /data-custom-html/i.test(openTag)) {
+    return {
+      id: newBlockId(),
+      type: "html",
+      html: sanitizeCustomHtml(inner),
+    };
+  }
   if (name === "h1" || name === "h2" || name === "h3") {
     const level = Number(name[1]) as 1 | 2 | 3;
     return { id: newBlockId(), type: "heading", level, text: stripTags(inner) };

@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Hosted blank/blog/shop shell Worker (source of truth mirrored in apps/api upload payload)",
+  "description": "Hosted blank/blog/shop shell Worker (shared Worker; source of truth for *.kumooo.site)",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "pnpm --filter @kumooo/theme-packs sync-skins-css && wrangler deploy",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"ok\"",
     "build": "echo \"ok\""

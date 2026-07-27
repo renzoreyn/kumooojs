@@ -70,6 +70,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "25 GB storage",
       "50 GB bandwidth",
       "5 custom domains",
+      "Custom HTML blocks",
       "No made-with badge",
       "5 seats",
       "Email support",
@@ -94,6 +95,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "100 GB storage",
       "500 GB bandwidth",
       "Unlimited custom domains",
+      "Custom HTML blocks",
       "No made-with badge",
       "Unlimited seats",
       "Priority support",
@@ -117,6 +119,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "Unlimited sites",
       "Custom storage & bandwidth",
       "Unlimited custom domains",
+      "Custom HTML blocks",
       "No made-with badge",
       "Unlimited seats",
       "Dedicated support + SLA",
@@ -185,6 +188,11 @@ export function customDomainLimit(planId: PlanId): number | null {
 export function canUseCustomDomains(planId: PlanId): boolean {
   const limit = PLANS[planId].customDomains;
   return limit === null || limit > 0;
+}
+
+/** Custom HTML block. Cumulus (pro) and above. */
+export function canUseCustomHtml(planId: PlanId | string | null | undefined): boolean {
+  return planId === "pro" || planId === "team" || planId === "scale";
 }
 
 export function seatLimit(planId: PlanId): number | null {
