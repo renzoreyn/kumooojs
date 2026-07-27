@@ -21,6 +21,7 @@ export type {
   GalleryImage,
   HeadingBlock,
   HeroBlock,
+  HtmlBlock,
   ImageBlock,
   LinkBlock,
   ListBlock,
@@ -68,6 +69,7 @@ export {
   blockDocumentCss,
   renderDocumentToHtml,
   safeEmbedSrc,
+  type DocumentChrome,
   type DocumentRenderContext,
 } from "./html";
 export { documentToEditableHtml, parseHtmlDocument } from "./from-html";
@@ -79,6 +81,12 @@ export {
   renderRichText,
   sanitizeRichText,
 } from "./rich-text";
+export {
+  CUSTOM_HTML_MAX_CHARS,
+  documentHasCustomHtml,
+  sanitizeCustomHtml,
+  sanitizeDocumentCustomHtml,
+} from "./sanitize-custom-html";
 export {
   SITE_FONTS,
   googleFontsHref,

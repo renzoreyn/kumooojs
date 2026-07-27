@@ -126,6 +126,13 @@ export type BadgeBlock = {
   tone?: "accent" | "muted" | "fg";
 };
 
+/** Sanitized inline HTML/CSS escape hatch (Cumulus+). */
+export type HtmlBlock = {
+  id: string;
+  type: "html";
+  html: string;
+};
+
 export type CalloutBlock = {
   id: string;
   type: "callout";
@@ -323,7 +330,8 @@ export type Block =
   | PricingCardBlock
   | TestimonialBlock
   | AlertBannerBlock
-  | BreadcrumbBlock;
+  | BreadcrumbBlock
+  | HtmlBlock;
 
 export type PageDocument = {
   version: 1;
@@ -363,6 +371,7 @@ export const BLOCK_TYPES = [
   "testimonial",
   "alert-banner",
   "breadcrumb",
+  "html",
 ] as const;
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
@@ -395,6 +404,7 @@ export const LEAF_BLOCK_TYPES = [
   "testimonial",
   "alert-banner",
   "breadcrumb",
+  "html",
 ] as const;
 
 export function newFieldId(): string {
@@ -595,6 +605,12 @@ export function createBlock(type: BlockType): Block {
           { label: "This page" },
         ],
       };
+    case "html":
+      return {
+        id,
+        type,
+        html: "<div>\n  <p>Custom HTML</p>\n</div>",
+      };
   }
 }
 
@@ -602,7 +618,10 @@ import { richTextToPlain } from "./rich-text";
 
 function plainFromBlocks(blocks: Block[], parts: string[]) {
   for (const b of blocks) {
-    if (b.type === "heading" || b.type === "paragraph" || b.type === "quote" || b.type === "callout" || b.type === "badge") {
+    if (b.type === "html") {
+      const t = b.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (t) parts.push(t);
+    } else if (b.type === "heading" || b.type === "paragraph" || b.type === "quote" || b.type === "callout" || b.type === "badge") {
       const t = richTextToPlain(b.text).trim();
       if (t) parts.push(t);
     } else if (b.type === "feature") {

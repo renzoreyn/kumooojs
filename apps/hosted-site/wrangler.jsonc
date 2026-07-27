@@ -3,6 +3,7 @@
   "name": "kumooo-hosted-site",
   "main": "src/index.ts",
   "compatibility_date": "2025-07-01",
+  "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "vars": {
     "API_ORIGIN": "https://api.example.com",

@@ -238,6 +238,8 @@ function blockToHtml(block: Block): string {
         .join("\n");
       return `<nav data-breadcrumb>\n${items}\n</nav>`;
     }
+    case "html":
+      return `<div data-custom-html>${block.html || ""}</div>`;
   }
 }
 

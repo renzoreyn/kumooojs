@@ -14,6 +14,7 @@ import {
   emptyDocument,
 } from "./types";
 import { sanitizeRichText } from "./rich-text";
+import { CUSTOM_HTML_MAX_CHARS, sanitizeCustomHtml } from "./sanitize-custom-html";
 
 export type ParseDocumentResult =
   | { ok: true; document: PageDocument }
@@ -371,6 +372,12 @@ function parseBlock(raw: unknown, depth: number): Block | null {
         items: items.length ? items : [{ label: "Home", href: "/" }],
       };
     }
+    case "html":
+      return {
+        id,
+        type: "html",
+        html: sanitizeCustomHtml(asString(o.html, CUSTOM_HTML_MAX_CHARS)),
+      };
   }
 }
 

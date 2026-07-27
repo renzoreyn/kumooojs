@@ -1,5 +1,6 @@
 import type { Block, GalleryImage, LogoItem, PageDocument, TextSize } from "./types";
 import { renderRichText } from "./rich-text";
+import { sanitizeCustomHtml } from "./sanitize-custom-html";
 
 function escapeHtml(s: string): string {
   return String(s)
@@ -134,19 +135,40 @@ function aspectPadding(aspect?: "16-9" | "4-3" | "1-1"): string {
   return "56.25%";
 }
 
+export type DocumentChrome = "plain" | "skin";
+
 export type DocumentRenderContext = {
   /** Published page links for `nav-links` blocks. */
   pages?: { title: string; href: string }[];
+  /**
+   * `plain` (default): blk-* classes for blank / generic hosts.
+   * `skin`: skin-* classes for blog/shop hosts that load theme-packs skins.css.
+   */
+  chrome?: DocumentChrome;
 };
+
+function isSkin(ctx: DocumentRenderContext): boolean {
+  return ctx.chrome === "skin";
+}
+
+function mutedClass(ctx: DocumentRenderContext): string {
+  return isSkin(ctx) ? "skin-muted" : "muted";
+}
 
 function renderBlocks(blocks: Block[], ctx: DocumentRenderContext): string {
   return blocks.map((b) => renderBlock(b, ctx)).filter(Boolean).join("\n");
 }
 
 function renderBlock(block: Block, ctx: DocumentRenderContext): string {
+  const skin = isSkin(ctx);
   switch (block.type) {
     case "heading": {
       const tag = `h${block.level}` as "h1" | "h2" | "h3";
+      if (skin) {
+        const size =
+          block.size === "sm" ? " skin-heading-sm" : block.size === "lg" ? " skin-heading-lg" : "";
+        return `<${tag} class="skin-heading${size}"${alignStyle(block.align)}>${renderRichText(block.text)}</${tag}>`;
+      }
       const base =
         block.level === 1 ? "blk-h1" : block.level === 3 ? "blk-h3" : "blk-h2";
       return `<${tag} class="${sizeClass(base, block.size)}"${alignStyle(block.align)}>${renderRichText(block.text)}</${tag}>`;
@@ -182,6 +204,9 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
           : block.align === "right"
             ? "blk-cta blk-cta-right"
             : "blk-cta";
+      if (skin) {
+        return `<p class="${wrap}"><a class="skin-btn" href="${escapeAttr(href)}">${renderRichText(block.label || "Button")}</a></p>`;
+      }
       const variant =
         block.variant === "outline"
           ? "blk-btn blk-btn-outline"
@@ -211,7 +236,15 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
       const max = block.max ?? 6;
       const pages = (ctx.pages || []).slice(0, max);
       if (!pages.length) {
-        return `<nav class="blk-nav"><span class="muted">No pages yet</span></nav>`;
+        return `<nav class="blk-nav"><span class="${mutedClass(ctx)}">No pages yet</span></nav>`;
+      }
+      if (skin) {
+        return `<nav class="blk-nav">${pages
+          .map(
+            (p) =>
+              `<a class="skin-btn" href="${escapeAttr(p.href)}">${escapeHtml(p.title)}</a>`,
+          )
+          .join("")}</nav>`;
       }
       return `<nav class="blk-nav">${pages
         .map(
@@ -221,7 +254,7 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
         .join("")}</nav>`;
     }
     case "divider":
-      return `<hr class="blk-hr"/>`;
+      return skin ? `<hr class="skin-rule"/>` : `<hr class="blk-hr"/>`;
     case "spacer":
       return `<div class="blk-spacer" style="height:${spacerPx(block.size)}px" aria-hidden="true"></div>`;
     case "section":
@@ -256,6 +289,9 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
       return `<form class="blk-form" data-kumooo-form data-form-id="${escapeAttr(block.id)}" data-success="${success}" novalidate>${heading}${fields}<button class="blk-form-submit" type="submit">${escapeHtml(block.submitLabel || "Send")}</button><p class="blk-form-status" hidden aria-live="polite"></p></form>`;
     }
     case "badge": {
+      if (skin) {
+        return `<p class="skin-badge">${renderRichText(block.text || "Badge")}</p>`;
+      }
       const tone =
         block.tone === "muted"
           ? "blk-badge blk-badge-muted"
@@ -277,7 +313,7 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
     case "embed": {
       const src = safeEmbedSrc(block.url);
       if (!src) {
-        return `<p class="blk-p muted">Embed URL not allowed or empty.</p>`;
+        return `<p class="blk-p ${mutedClass(ctx)}">Embed URL not allowed or empty.</p>`;
       }
       const aspect = block.type === "embed" ? block.aspect : "16-9";
       const title =
@@ -304,14 +340,18 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
           : block.background === "accent-soft"
             ? " blk-hero-accent"
             : "";
+      const btnClass = skin ? "skin-btn" : "blk-btn";
       const btn =
         block.buttonLabel
-          ? `<p class="blk-cta${align === "center" ? " blk-cta-center" : align === "right" ? " blk-cta-right" : ""}"><a class="blk-btn" href="${escapeAttr(block.buttonHref || "#")}">${escapeHtml(block.buttonLabel)}</a></p>`
+          ? `<p class="blk-cta${align === "center" ? " blk-cta-center" : align === "right" ? " blk-cta-right" : ""}"><a class="${btnClass}" href="${escapeAttr(block.buttonHref || "#")}">${escapeHtml(block.buttonLabel)}</a></p>`
           : "";
       const sub = block.subtext
-        ? `<p class="blk-hero-sub">${escapeHtml(block.subtext)}</p>`
+        ? `<p class="blk-hero-sub${skin ? ` ${mutedClass(ctx)}` : ""}">${escapeHtml(block.subtext)}</p>`
         : "";
-      return `<div class="blk-hero${alignStyle2}${bgClass}"><h1 class="blk-hero-heading">${escapeHtml(block.heading || "")}</h1>${sub}${btn}</div>`;
+      const headingClass = skin
+        ? "font-display skin-title"
+        : "blk-hero-heading";
+      return `<div class="blk-hero${alignStyle2}${bgClass}"><h1 class="${headingClass}">${escapeHtml(block.heading || "")}</h1>${sub}${btn}</div>`;
     }
     case "stats": {
       const align = block.align || "center";
@@ -377,7 +417,11 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
         ? `<p class="blk-pricing-desc">${escapeHtml(block.description)}</p>`
         : "";
       const btn = block.buttonLabel
-        ? `<p class="blk-cta"><a class="blk-btn${block.highlighted ? "" : " blk-btn-outline"}" href="${escapeAttr(block.buttonHref || "#")}">${escapeHtml(block.buttonLabel)}</a></p>`
+        ? `<p class="blk-cta"><a class="${
+            skin
+              ? "skin-btn"
+              : `blk-btn${block.highlighted ? "" : " blk-btn-outline"}`
+          }" href="${escapeAttr(block.buttonHref || "#")}">${escapeHtml(block.buttonLabel)}</a></p>`
         : "";
       return `<div class="blk-pricing${hlClass}"><p class="blk-pricing-name">${escapeHtml(block.name || "")}</p><p class="blk-pricing-price">${escapeHtml(block.price || "")}<span class="blk-pricing-period">${escapeHtml(block.period || "")}</span></p>${desc}<ul class="blk-pricing-list">${features}</ul>${btn}</div>`;
     }
@@ -414,6 +458,11 @@ function renderBlock(block: Block, ctx: DocumentRenderContext): string {
         })
         .join("");
       return `<nav class="blk-crumb" aria-label="Breadcrumb">${items}</nav>`;
+    }
+    case "html": {
+      const html = sanitizeCustomHtml(block.html || "");
+      if (!html) return "";
+      return `<div class="blk-html">${html}</div>`;
     }
   }
 }
@@ -489,6 +538,7 @@ export function blockDocumentCss(): string {
     `.blk-callout-warn{background:color-mix(in srgb,#c2410c 12%,transparent);border-color:transparent}`,
     `.blk-embed{position:relative;width:100%;margin:1.25rem 0;border-radius:12px;overflow:hidden;background:var(--line)}`,
     `.blk-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}`,
+    `.blk-html{margin:1rem 0;max-width:100%;overflow-x:auto}`,
     `.blk-feature{margin:1rem 0 1.25rem}`,
     `.blk-feature-title{margin:0 0 .35rem;font-size:1.1rem;font-weight:650;letter-spacing:-.02em}`,
     `.blk-feature-body{margin:0;line-height:1.6;color:var(--muted,var(--fog,#888))}`,
@@ -562,7 +612,7 @@ export function renderDocumentToHtml(
   ctx: DocumentRenderContext = {},
 ): string {
   if (!doc || !doc.blocks?.length) {
-    return `<p class="blk-p muted">This page is empty.</p>`;
+    return `<p class="blk-p ${mutedClass(ctx)}">This page is empty.</p>`;
   }
   return renderBlocks(doc.blocks, ctx);
 }

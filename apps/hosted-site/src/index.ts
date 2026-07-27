@@ -10,6 +10,13 @@ import {
   siteFontFamilyCss,
   type PageDocument,
 } from "@kumooo/blocks";
+import {
+  COLOR_MODE_STORAGE_KEY,
+  isSkinId,
+  SKINS_CSS,
+  themeBootScript,
+  type SkinId,
+} from "@kumooo/theme-packs/skins";
 
 export interface Env {
   API_ORIGIN: string;
@@ -30,6 +37,7 @@ function apiFetch(env: Env, path: string, init?: RequestInit): Promise<Response>
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const html = makeHtmlResponder(env);
     const url = new URL(request.url);
     let slug = slugFromHost(url.hostname, env.SITE_SUFFIX || "kumooo.site");
     if (!slug) {
@@ -87,6 +95,7 @@ export default {
     const name = siteMeta.name || slug;
     const template =
       siteMeta.template === "blog" || siteMeta.template === "shop" ? siteMeta.template : "blank";
+    const useSkin = template === "blog" || template === "shop";
     const apiOrigin = (env.API_ORIGIN || "https://api.kumooo.dev").replace(/\/$/, "");
     const pageLinks = await loadPageLinks(env, slug);
     const theme = {
@@ -101,10 +110,13 @@ export default {
       iconUrl: siteMeta.iconUrl,
       logoUrl: siteMeta.logoUrl,
     };
-    const chromeCtx = renderCtx(pageLinks);
+    const chromeCtx = {
+      ...renderCtx(pageLinks),
+      chrome: useSkin ? ("skin" as const) : ("plain" as const),
+    };
 
     function shellBody(homeHref: string | null, content: string): string {
-      return `${renderHeader(siteMeta, name, homeHref, pageLinks, chromeCtx)}${content}${renderFooter(siteMeta, chromeCtx)}`;
+      return `${renderHeader(siteMeta, name, homeHref, pageLinks, chromeCtx, useSkin)}${content}${renderFooter(siteMeta, chromeCtx)}`;
     }
 
     if (path.startsWith("/pages/")) {
@@ -129,7 +141,10 @@ export default {
       const content = p.document
         ? renderDocumentToHtml(p.document, chromeCtx)
         : `<div class="prose">${escapeHtml(p.body || "").replace(/\n/g, "<br/>")}</div>`;
-      const body = shellBody("/", `<article class="wrap"><h1>${escapeHtml(p.title)}</h1>${content}</article>`);
+      const heading = useSkin
+        ? `<h1 class="skin-heading">${escapeHtml(p.title)}</h1>`
+        : `<h1>${escapeHtml(p.title)}</h1>`;
+      const body = shellBody("/", `<article class="wrap">${heading}${content}</article>`);
       return html(
         pageShell(skin, titleFor(siteMeta, p.metaTitle || p.title), body, template, {
           ...theme,
@@ -165,8 +180,8 @@ export default {
           : `<div class="prose">${escapeHtml(p.body || "").replace(/\n/g, "<br/>")}</div>`;
         const body = shellBody(
           "/",
-          `<article class="wrap"><h1>${escapeHtml(p.title)}</h1>${
-            p.excerpt ? `<p class="muted">${escapeHtml(p.excerpt)}</p>` : ""
+          `<article class="wrap"><h1 class="skin-heading">${escapeHtml(p.title)}</h1>${
+            p.excerpt ? `<p class="skin-muted">${escapeHtml(p.excerpt)}</p>` : ""
           }${content}</article>`,
         );
         return html(
@@ -185,20 +200,23 @@ export default {
       const posts = hasError(data) ? [] : data.posts || [];
       const list =
         posts.length === 0
-          ? `<p class="muted">Nothing published yet. Write a post in the dashboard.</p>`
-          : `<ul class="list">${posts
+          ? `<p class="skin-muted">Nothing published yet. Write a post in the dashboard.</p>`
+          : `<ul class="skin-post-list">${posts
               .map(
                 (p) =>
-                  `<li><a href="/posts/${encodeURIComponent(p.slug)}"><strong>${escapeHtml(p.title)}</strong></a>${
-                    p.excerpt ? `<p class="muted">${escapeHtml(p.excerpt)}</p>` : ""
-                  }</li>`,
+                  `<li><a class="skin-card" href="/posts/${encodeURIComponent(p.slug)}"><span class="skin-badge">Post</span><h2 class="skin-heading">${escapeHtml(p.title)}</h2>${
+                    p.excerpt ? `<p class="skin-muted">${escapeHtml(p.excerpt)}</p>` : ""
+                  }</a></li>`,
               )
               .join("")}</ul>`;
       return html(
         pageShell(
           skin,
           titleFor(siteMeta, name),
-          shellBody(null, `<div class="wrap"><h1>${escapeHtml(name)}</h1>${list}</div>`),
+          shellBody(
+            null,
+            `<div class="wrap wrap-wide"><p class="skin-badge">Blog</p><h1 class="font-display skin-title">${escapeHtml(name)}</h1>${list}</div>`,
+          ),
           template,
           { ...theme, description: siteMeta.metaDescription, ogImage: siteMeta.ogImageUrl },
         ),
@@ -232,9 +250,9 @@ export default {
           "/",
           `<article class="wrap">${
             p.imageUrl ? `<img class="hero-img" src="${escapeAttr(p.imageUrl)}" alt="" />` : ""
-          }<h1>${escapeHtml(p.name)}</h1><p class="price">${formatMoney(p.priceCents)}</p>${
-            p.blurb ? `<p class="muted">${escapeHtml(p.blurb)}</p>` : ""
-          }${content}<p class="muted">Bag is pretend. No checkout here.</p></article>`,
+          }<h1 class="skin-heading">${escapeHtml(p.name)}</h1><p class="skin-price">${formatMoney(p.priceCents)}</p>${
+            p.blurb ? `<p class="skin-muted">${escapeHtml(p.blurb)}</p>` : ""
+          }${content}<p class="skin-muted">Bag is pretend. No checkout here.</p></article>`,
         );
         return html(
           pageShell(skin, titleFor(siteMeta, p.name), body, template, {
@@ -251,22 +269,25 @@ export default {
       const products = hasError(data) ? [] : data.products || [];
       const grid =
         products.length === 0
-          ? `<p class="muted">Catalog is empty. Add products in the dashboard.</p>`
-          : `<div class="grid">${products
+          ? `<p class="skin-muted">Catalog is empty. Add products in the dashboard.</p>`
+          : `<div class="skin-product-grid">${products
               .map(
                 (p) =>
-                  `<a class="card" href="/products/${encodeURIComponent(p.slug)}">${
+                  `<a class="skin-card" href="/products/${encodeURIComponent(p.slug)}">${
                     p.imageUrl ? `<img src="${escapeAttr(p.imageUrl)}" alt="" />` : ""
-                  }<strong>${escapeHtml(p.name)}</strong><span class="price">${formatMoney(p.priceCents)}</span>${
-                    p.blurb ? `<p class="muted">${escapeHtml(p.blurb)}</p>` : ""
-                  }</a>`,
+                  }<div class="skin-card-body"><h2 class="skin-heading">${escapeHtml(p.name)}</h2><span class="skin-price">${formatMoney(p.priceCents)}</span>${
+                    p.blurb ? `<p class="skin-muted">${escapeHtml(p.blurb)}</p>` : ""
+                  }</div></a>`,
               )
               .join("")}</div>`;
       return html(
         pageShell(
           skin,
           titleFor(siteMeta, name),
-          shellBody(null, `<div class="wrap"><h1>${escapeHtml(name)}</h1>${grid}</div>`),
+          shellBody(
+            null,
+            `<div class="wrap wrap-wide"><p class="skin-badge">Drop</p><h1 class="font-display skin-title">${escapeHtml(name)}</h1>${grid}</div>`,
+          ),
           template,
           { ...theme, description: siteMeta.metaDescription, ogImage: siteMeta.ogImageUrl },
         ),
@@ -467,7 +488,21 @@ function escapeAttr(s: string): string {
   return escapeHtml(s).replace(/'/g, "&#39;");
 }
 
-function nav(name: string, homeHref: string | null, pages: PageLink[]): string {
+function isHexColor(value: string | null | undefined): value is string {
+  return Boolean(value && /^#[0-9a-fA-F]{6}$/.test(value));
+}
+
+function nav(name: string, homeHref: string | null, pages: PageLink[], useSkin: boolean): string {
+  if (useSkin) {
+    const links = pages
+      .slice(0, 6)
+      .map(
+        (p) =>
+          `<a class="skin-btn" href="/pages/${encodeURIComponent(p.slug)}">${escapeHtml(p.title)}</a>`,
+      )
+      .join("");
+    return `<header class="skin-masthead"><div class="skin-scanlines" aria-hidden="true"></div><div class="skin-masthead-inner"><a class="skin-brand" href="${homeHref || "/"}">${escapeHtml(name)}</a><div class="skin-masthead-nav">${links}<a class="skin-btn" href="https://app.kumooo.dev">Edit</a><button type="button" class="skin-btn skin-mode-toggle" aria-label="Toggle color mode">Theme</button></div></div></header>`;
+  }
   const links = pages
     .slice(0, 6)
     .map(
@@ -492,15 +527,22 @@ function renderHeader(
   name: string,
   homeHref: string | null,
   pages: PageLink[],
-  ctx: ReturnType<typeof renderCtx>,
+  ctx: ReturnType<typeof renderCtx> & { chrome: "plain" | "skin" },
+  useSkin: boolean,
 ): string {
   if (meta.headerDocument?.blocks?.length) {
+    if (useSkin) {
+      return `<header class="skin-masthead"><div class="skin-scanlines" aria-hidden="true"></div><div class="skin-masthead-inner">${renderDocumentToHtml(meta.headerDocument, ctx)}</div></header>`;
+    }
     return `<header class="site-chrome"><div class="site-chrome-inner">${renderDocumentToHtml(meta.headerDocument, ctx)}</div></header>`;
   }
-  return nav(name, homeHref, pages);
+  return nav(name, homeHref, pages, useSkin);
 }
 
-function renderFooter(meta: PublicSite, ctx: ReturnType<typeof renderCtx>): string {
+function renderFooter(
+  meta: PublicSite,
+  ctx: ReturnType<typeof renderCtx> & { chrome: "plain" | "skin" },
+): string {
   if (meta.footerDocument?.blocks?.length) {
     return `<footer class="site-footer"><div class="site-footer-inner">${renderDocumentToHtml(meta.footerDocument, ctx)}</div></footer>`;
   }
@@ -514,6 +556,10 @@ function siteRuntimeScript(apiOrigin: string, siteSlug: string): string {
   return `<script>(function(){var API=${api},SLUG=${slug};try{var path=location.pathname||"/";var body=JSON.stringify({path:path});var url=API+"/public/sites/"+encodeURIComponent(SLUG)+"/collect";var sent=false;try{if(navigator.sendBeacon){sent=navigator.sendBeacon(url,new Blob([body],{type:"text/plain;charset=UTF-8"}));}}catch(e){}if(!sent){fetch(url,{method:"POST",headers:{"content-type":"text/plain;charset=UTF-8"},body:body,keepalive:true,mode:"cors",credentials:"omit"}).catch(function(){});}}catch(e){}function status(el,msg,ok){if(!el)return;el.hidden=!msg;el.textContent=msg||"";el.className="blk-form-status"+(msg?(ok?" is-ok":" is-err"):"");}document.addEventListener("submit",function(ev){var form=ev.target;if(!(form instanceof HTMLFormElement)||!form.hasAttribute("data-kumooo-form"))return;ev.preventDefault();var id=form.getAttribute("data-form-id");if(!id)return;var btn=form.querySelector('button[type="submit"]');var note=form.querySelector(".blk-form-status");var values={};new FormData(form).forEach(function(v,k){if(typeof v==="string")values[k]=v;});if(btn)btn.disabled=true;status(note,"Sending…",true);fetch(API+"/public/sites/"+encodeURIComponent(SLUG)+"/forms/"+encodeURIComponent(id)+"/submit",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({values:values,pagePath:location.pathname})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(res){if(!res.ok){var msg=(res.j&&res.j.error)||"Could not send";if(res.j&&res.j.error==="validation")msg="Check the required fields.";status(note,msg,false);if(btn)btn.disabled=false;return;}form.reset();status(note,form.getAttribute("data-success")||"Got it.",true);if(btn)btn.disabled=false;}).catch(function(){status(note,"Network error. Try again.",false);if(btn)btn.disabled=false;});});})();</script>`;
 }
 
+function colorModeToggleScript(): string {
+  return `<script>(function(){var K=${JSON.stringify(COLOR_MODE_STORAGE_KEY)};document.querySelectorAll(".skin-mode-toggle").forEach(function(b){b.addEventListener("click",function(){var d=!document.documentElement.classList.contains("dark");document.documentElement.classList.toggle("dark",d);try{localStorage.setItem(K,d?"dark":"light");}catch(e){}});});})();</script>`;
+}
+
 function pageShell(
   skin: string,
   title: string,
@@ -521,26 +567,7 @@ function pageShell(
   template: string,
   head: HeadMeta = {},
 ): string {
-  const accents = { y2k: "#ff2bd6", kumooo: "#0d9488", glass: "#0071e3" };
-  const skinAccent =
-    skin === "y2k" || skin === "glass" || skin === "kumooo" ? accents[skin] : accents.kumooo;
-  const accent =
-    head.themeAccent && /^#[0-9a-fA-F]{6}$/.test(head.themeAccent)
-      ? head.themeAccent
-      : skinAccent;
-  const bg =
-    head.themeBg && /^#[0-9a-fA-F]{6}$/.test(head.themeBg) ? head.themeBg : "";
-  const fg =
-    head.themeFg && /^#[0-9a-fA-F]{6}$/.test(head.themeFg) ? head.themeFg : "";
-  const fontFamily = siteFontFamilyCss(head.themeFont, head.themeFontUrl);
-  const googleHref = googleFontsHref(head.themeFont);
-  const fontLink = googleHref
-    ? `<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><link href="${escapeAttr(googleHref)}" rel="stylesheet"/>`
-    : "";
-  const customFontFace =
-    head.themeFont === "custom" && head.themeFontUrl
-      ? `@font-face{font-family:kumooo-custom;src:url("${escapeAttr(head.themeFontUrl)}") format("woff2"),url("${escapeAttr(head.themeFontUrl)}");font-display:swap;}:root{--font-custom:kumooo-custom,ui-sans-serif,system-ui,sans-serif}`
-      : "";
+  const useSkin = template === "blog" || template === "shop";
   const desc = head.description
     ? `<meta name="description" content="${escapeAttr(head.description)}"/>`
     : "";
@@ -562,7 +589,49 @@ function pageShell(
       ? siteRuntimeScript(head.apiOrigin, head.siteSlug)
       : "";
   const credit = head.hideCredit ? "" : madeWithCreditHtml();
-  return `<!doctype html><html lang="en" data-skin="${escapeAttr(skin)}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(title)}</title>${desc}${ogTitle}${ogDesc}${ogImg}${canonical}${favicon}${fontLink}<style>${customFontFace}${css(accent, bg, fg, fontFamily)}${blockDocumentCss()}</style></head><body data-template="${escapeAttr(template)}">${body}${credit}${runtime}</body></html>`;
+
+  if (!useSkin) {
+    const accents = { y2k: "#ff2bd6", kumooo: "#0d9488", glass: "#0071e3" };
+    const skinAccent =
+      skin === "y2k" || skin === "glass" || skin === "kumooo" ? accents[skin] : accents.kumooo;
+    const accent =
+      head.themeAccent && /^#[0-9a-fA-F]{6}$/.test(head.themeAccent)
+        ? head.themeAccent
+        : skinAccent;
+    const bg =
+      head.themeBg && /^#[0-9a-fA-F]{6}$/.test(head.themeBg) ? head.themeBg : "";
+    const fg =
+      head.themeFg && /^#[0-9a-fA-F]{6}$/.test(head.themeFg) ? head.themeFg : "";
+    const fontFamily = siteFontFamilyCss(head.themeFont, head.themeFontUrl);
+    const googleHref = googleFontsHref(head.themeFont);
+    const fontLink = googleHref
+      ? `<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><link href="${escapeAttr(googleHref)}" rel="stylesheet"/>`
+      : "";
+    const customFontFace =
+      head.themeFont === "custom" && head.themeFontUrl
+        ? `@font-face{font-family:kumooo-custom;src:url("${escapeAttr(head.themeFontUrl)}") format("woff2"),url("${escapeAttr(head.themeFontUrl)}");font-display:swap;}:root{--font-custom:kumooo-custom,ui-sans-serif,system-ui,sans-serif}`
+        : "";
+    return `<!doctype html><html lang="en" data-skin="${escapeAttr(skin)}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(title)}</title>${desc}${ogTitle}${ogDesc}${ogImg}${canonical}${favicon}${fontLink}<style>${customFontFace}${css(accent, bg, fg, fontFamily)}${blockDocumentCss()}</style></head><body data-template="${escapeAttr(template)}">${body}${credit}${runtime}</body></html>`;
+  }
+
+  const skinId: SkinId = isSkinId(skin) ? skin : "kumooo";
+  const skinFontsHref =
+    "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Orbitron:wght@500;700;800&family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap";
+  const fontLink = `<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><link href="${escapeAttr(skinFontsHref)}" rel="stylesheet"/>`;
+  const fontVars =
+    `:root{--font-y2k-sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--font-y2k-display:"Orbitron",ui-sans-serif,system-ui,sans-serif;--font-kumooo-sans:"Figtree",ui-sans-serif,system-ui,sans-serif;--font-kumooo-display:"Outfit",ui-sans-serif,system-ui,sans-serif}`;
+  const accentOverride = isHexColor(head.themeAccent)
+    ? `html[data-skin]{--hot:${head.themeAccent};--accent-ui:${head.themeAccent}}`
+    : "";
+  const paperInkParts: string[] = [];
+  if (isHexColor(head.themeBg)) paperInkParts.push(`--paper:${head.themeBg}`);
+  if (isHexColor(head.themeFg)) paperInkParts.push(`--ink:${head.themeFg}`);
+  const paperInkOverride = paperInkParts.length
+    ? `html[data-skin]:not(.dark){${paperInkParts.join(";")}}`
+    : "";
+  const boot = `<script>${themeBootScript(skinId, { preferStored: false })}</script>`;
+  const style = `${fontVars}${SKINS_CSS}${accentOverride}${paperInkOverride}${hostedSkinLayoutCss()}${blockDocumentCss()}`;
+  return `<!doctype html><html lang="en" data-skin="${escapeAttr(skinId)}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${escapeHtml(title)}</title>${desc}${ogTitle}${ogDesc}${ogImg}${canonical}${favicon}${fontLink}${boot}<style>${style}</style></head><body data-template="${escapeAttr(template)}">${body}${credit}${runtime}${colorModeToggleScript()}</body></html>`;
 }
 
 function madeWithCreditHtml(): string {
@@ -632,6 +701,10 @@ function unclaimedShell(slug: string, claimUrl: string): string {
 </html>`;
 }
 
+function hostedSkinLayoutCss(): string {
+  return `*{box-sizing:border-box}html{--fg:var(--ink);--bg:var(--paper);--muted:var(--fog);--card:var(--surface);--line:color-mix(in srgb,var(--ink) 14%,transparent);--accent:var(--hot);--mint:var(--accent-ui)}a{color:inherit;text-decoration:none}.wrap{max-width:720px;margin:0 auto;padding:1.25rem}.wrap-wide{max-width:64rem}.skin-btn{display:inline-flex;align-items:center;justify-content:center;padding:.45rem .75rem;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;text-decoration:none}.skin-masthead-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;max-width:64rem;margin:0 auto;padding:.75rem 1.25rem}.skin-masthead-nav{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}.skin-brand{text-decoration:none;color:inherit}.skin-post-list{list-style:none;padding:0;margin:1.5rem 0;display:grid;gap:1rem}.skin-post-list .skin-card{display:block;padding:1.25rem;text-decoration:none}.skin-post-list .skin-heading{margin:.75rem 0 .35rem}.skin-product-grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:1.5rem}.skin-product-grid .skin-card{display:flex;flex-direction:column;text-decoration:none;overflow:hidden}.skin-product-grid .skin-card img{width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--line)}.skin-card-body{display:flex;flex-direction:column;gap:.35rem;padding:1rem}.skin-price{font-weight:700;color:var(--hot)}.hero-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--skin-radius-sm,10px);background:var(--line);margin-bottom:1rem}.prose{line-height:1.65;white-space:pre-wrap}.skin-heading-sm{font-size:1.15rem}.skin-heading-lg{font-size:clamp(2rem,4vw,2.75rem)}.font-display.skin-title{font-size:clamp(2.5rem,6vw,4.5rem);line-height:.95;margin:.4rem 0 1rem}.kumooo-credit{position:fixed;right:1rem;bottom:1rem;z-index:40;display:inline-flex;align-items:center;gap:.55rem;padding:.55rem .85rem .55rem .6rem;border-radius:999px;background:rgba(12,12,14,.88);border:1px solid rgba(245,245,247,.14);color:#f5f5f7;text-decoration:none;font-size:12px;font-weight:600;letter-spacing:-.02em;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.25)}.kumooo-credit em{font-style:normal;color:#0d9488}.kumooo-credit-mark{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#0c0c0e;border:1px solid rgba(245,245,247,.12);flex-shrink:0}.kumooo-credit:hover{opacity:.95}@media(max-width:520px){.kumooo-credit{right:.75rem;bottom:.75rem;font-size:11px}}`;
+}
+
 function css(accent: string, bgOverride = "", fgOverride = "", fontFamily = "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"): string {
   const bgLight = bgOverride || "#f5f5f7";
   const fgLight = fgOverride || "#1d1d1f";
@@ -653,12 +726,50 @@ function css(accent: string, bgOverride = "", fgOverride = "", fontFamily = "ui-
   return `:root{${lockScheme}--bg:${bgLight};--fg:${fgLight};--muted:${mutedLight};--card:${bgOverride ? `color-mix(in srgb, ${bgOverride} 92%, ${fgOverride || "#fff"} 8%)` : "#fff"};--line:${lineLight};--accent:${accent};--mint:${accent};--radius:14px;--font-sans:${fontFamily}}html[data-skin=y2k]{--accent:${accent}}html[data-skin=glass]{--accent:${accent}}html[data-skin=kumooo]{--accent:${accent}}@media(prefers-color-scheme:dark){:root{--bg:${bgDark};--fg:${fgDark};--muted:${mutedDark};--card:${bgOverride ? `color-mix(in srgb, ${bgOverride} 92%, ${fgOverride || "#fff"} 8%)` : "#161618"};--line:${lineDark}}}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:var(--font-sans);background:radial-gradient(900px 420px at 50% -10%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 55%),var(--bg);color:var(--fg)}a{color:inherit}.wrap{max-width:720px;margin:0 auto;padding:1.25rem}.hero{padding-top:4rem}.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}.muted{color:var(--muted);line-height:1.55}h1{letter-spacing:-.03em;font-size:clamp(2rem,5vw,3rem);margin:.4rem 0 1rem}.btn{display:inline-flex;align-items:center;justify-content:center;padding:.7rem 1.1rem;border-radius:999px;background:var(--fg);color:var(--bg);text-decoration:none;font-weight:600;font-size:14px}.mast{border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent);backdrop-filter:blur(10px)}.row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}.brand{font-weight:700;text-decoration:none;letter-spacing:-.02em}.nav{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}.ghost{font-size:13px;color:var(--muted);text-decoration:none}.list{list-style:none;padding:0;margin:1.5rem 0;display:grid;gap:1rem}.list li{border:1px solid var(--line);border-radius:var(--radius);padding:1rem;background:var(--card)}.list a{text-decoration:none}.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:1.5rem}.card{display:flex;flex-direction:column;gap:.35rem;border:1px solid var(--line);border-radius:var(--radius);padding:1rem;background:var(--card);text-decoration:none}.card img,.hero-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--line)}.price{font-weight:700;color:var(--accent)}.prose{line-height:1.65;white-space:pre-wrap}.kumooo-credit{position:fixed;right:1rem;bottom:1rem;z-index:40;display:inline-flex;align-items:center;gap:.55rem;padding:.55rem .85rem .55rem .6rem;border-radius:999px;background:rgba(12,12,14,.88);border:1px solid rgba(245,245,247,.14);color:#f5f5f7;text-decoration:none;font-size:12px;font-weight:600;letter-spacing:-.02em;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.25)}.kumooo-credit em{font-style:normal;color:#0d9488}.kumooo-credit-mark{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#0c0c0e;border:1px solid rgba(245,245,247,.12);flex-shrink:0}.kumooo-credit:hover{opacity:.95}@media(max-width:520px){.kumooo-credit{right:.75rem;bottom:.75rem;font-size:11px}}`;
 }
 
-function html(body: string, status = 200): Response {
-  return new Response(body, {
-    status,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "public, s-maxage=60, stale-while-revalidate=300",
-    },
-  });
+function makeHtmlResponder(env: Env) {
+  const api = (env.API_ORIGIN || "https://api.kumooo.dev").replace(/\/$/, "");
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    `connect-src 'self' ${api}`,
+    [
+      "frame-src",
+      "https://www.youtube.com",
+      "https://www.youtube-nocookie.com",
+      "https://player.vimeo.com",
+      "https://www.loom.com",
+      "https://www.cal.com",
+      "https://cal.com",
+      "https://calendly.com",
+      "https://www.calendly.com",
+      "https://maps.google.com",
+      "https://www.google.com",
+      "https://www.openstreetmap.org",
+      "https://openstreetmap.org",
+      "https://codepen.io",
+      "https://codesandbox.io",
+      "https://stackblitz.com",
+      "https://www.figma.com",
+      "https://open.spotify.com",
+    ].join(" "),
+    "object-src 'none'",
+    "base-uri 'none'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+  return function html(body: string, status = 200): Response {
+    return new Response(body, {
+      status,
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, s-maxage=60, stale-while-revalidate=300",
+        "content-security-policy": csp,
+      },
+    });
+  };
 }

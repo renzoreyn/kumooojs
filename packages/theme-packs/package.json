@@ -15,6 +15,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./skins": {
+      "types": "./src/skins-core.ts",
+      "default": "./src/skins-core.ts"
+    },
     "./skins.css": "./src/skins.css"
   },
   "publishConfig": {
@@ -27,6 +31,7 @@
   },
   "homepage": "https://kumooo.dev",
   "scripts": {
+    "sync-skins-css": "node ./scripts/sync-skins-css.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"ok\"",
     "build": "echo \"ok\""
