@@ -77,7 +77,7 @@ Use `@kumooo/starter-blog` or `@kumooo/starter-shop` for the other starters.
 
 ### Custom domain
 
-Cloudflare dashboard: Workers & Pages → your Worker → Settings → Domains & Routes. Details: [Custom domains](https://docs.kumooo.dev/docs/guides/custom-domains).
+Cloudflare dashboard: Workers & Pages > your Worker > Settings > Domains & Routes. Details: [Custom domains](https://docs.kumooo.dev/docs/guides/custom-domains).
 
 ## Hosted on kumooo
 
