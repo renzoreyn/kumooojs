@@ -1,0 +1,80 @@
+@import "@kumooo/ui/globals.css";
+
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "./**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+
+:root {
+  color-scheme: light;
+  --background: 40 20% 97%;
+  --foreground: 160 10% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 10% 8%;
+  --primary: 175 84% 28%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 160 12% 94%;
+  --secondary-foreground: 160 10% 12%;
+  --muted: 160 10% 94%;
+  --muted-foreground: 160 6% 40%;
+  --accent: 160 14% 92%;
+  --accent-foreground: 160 10% 12%;
+  --border: 160 10% 86%;
+  --input: 160 10% 86%;
+  --ring: 175 84% 28%;
+  --mint: #0d9488;
+  --fog: hsl(160 6% 40%);
+  --surface: hsl(40 24% 99%);
+  --glow: rgba(13, 148, 136, 0.12);
+  --grain: rgba(20, 40, 36, 0.035);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 160 8% 5%;
+  --foreground: 40 12% 96%;
+  --card: 160 8% 8%;
+  --card-foreground: 40 12% 96%;
+  --primary: 158 64% 62%;
+  --primary-foreground: 160 10% 8%;
+  --secondary: 160 8% 12%;
+  --secondary-foreground: 40 12% 96%;
+  --muted: 160 8% 12%;
+  --muted-foreground: 160 6% 62%;
+  --accent: 160 8% 14%;
+  --accent-foreground: 40 12% 96%;
+  --border: 160 8% 18%;
+  --input: 160 8% 18%;
+  --ring: 158 64% 62%;
+  --mint: #6ee7b7;
+  --fog: hsl(160 6% 62%);
+  --surface: hsl(160 8% 7%);
+  --glow: rgba(110, 231, 183, 0.1);
+  --grain: rgba(255, 255, 255, 0.03);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 520px at 70% -15%, var(--glow), transparent 55%),
+    radial-gradient(700px 400px at 10% 20%, var(--glow), transparent 50%),
+    linear-gradient(165deg, var(--surface) 0%, hsl(var(--background)) 48%, hsl(var(--background)) 100%);
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}

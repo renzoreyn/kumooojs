@@ -1,0 +1,43 @@
+{
+  "name": "@kumooo/theme-packs",
+  "version": "0.1.0",
+  "description": "Shared visual skins (y2k, kumooo, glass) for kumooo.js blog and shop starters",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./skins.css": "./src/skins.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renzoreyn/kumooo.git",
+    "directory": "packages/theme-packs"
+  },
+  "homepage": "https://kumooo.dev",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"ok\"",
+    "build": "echo \"ok\""
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2"
+  }
+}

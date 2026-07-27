@@ -1,0 +1,7 @@
+@import "@kumooo/ui/globals.css";
+@import "@kumooo/theme-packs/skins.css";
+
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/theme-packs/src/**/*.{ts,tsx}";
+@source "./**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";

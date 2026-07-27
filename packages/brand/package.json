@@ -1,0 +1,48 @@
+{
+  "name": "@kumooo/brand",
+  "version": "0.1.0",
+  "description": "kumooo.js brand mark, OG cards, and made-with badge",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "assets"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./og": {
+      "types": "./src/og.tsx",
+      "default": "./src/og.tsx"
+    },
+    "./made-with": {
+      "types": "./src/made-with.tsx",
+      "default": "./src/made-with.tsx"
+    },
+    "./assets/brand-mark.png": "./assets/brand-mark.png",
+    "./assets/favicon.svg": "./assets/favicon.svg"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"ok\"",
+    "build": "echo \"ok\""
+  }
+}

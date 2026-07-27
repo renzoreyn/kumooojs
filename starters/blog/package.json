@@ -1,0 +1,31 @@
+{
+  "name": "@kumooo/starter-blog",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "node ../../node_modules/next/dist/bin/next build",
+    "start": "next start",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@kumooo/brand": "workspace:*",
+    "@kumooo/theme-packs": "workspace:*",
+    "@kumooo/ui": "workspace:*",
+    "@opennextjs/cloudflare": "^1.20.2",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.113.0"
+  }
+}

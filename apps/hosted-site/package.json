@@ -1,0 +1,22 @@
+{
+  "name": "@kumooo/hosted-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Hosted blank/blog/shop shell Worker (source of truth mirrored in apps/api upload payload)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"ok\"",
+    "build": "echo \"ok\""
+  },
+  "dependencies": {
+    "@kumooo/blocks": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.113.0"
+  }
+}

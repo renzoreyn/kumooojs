@@ -1,0 +1,531 @@
+/*
+  Shared skins for blog/shop.
+  Toggle with data-skin="y2k" | "kumooo" | "glass" on <html>.
+  Color mode via .dark on <html>.
+
+  Fonts (set by host app via next/font, then remapped here):
+  - y2k:    --font-y2k-display (Orbitron), --font-y2k-sans (Space Grotesk)
+  - kumooo: --font-kumooo-display (Outfit), --font-kumooo-sans (Figtree)
+  - glass:  system UI stack (Apple SF on Apple devices)
+*/
+
+/* —— Shared chrome (skin-aware via CSS vars) —— */
+
+.skin-btn {
+  border: var(--skin-btn-border);
+  background: var(--skin-btn-bg);
+  color: var(--ink);
+  box-shadow: var(--skin-btn-shadow);
+  border-radius: var(--skin-radius-sm);
+  backdrop-filter: var(--skin-btn-blur, none);
+  -webkit-backdrop-filter: var(--skin-btn-blur, none);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.skin-btn:hover {
+  transform: var(--skin-btn-hover-transform);
+  box-shadow: var(--skin-btn-hover-shadow);
+}
+
+.skin-btn:active {
+  transform: var(--skin-btn-active-transform);
+  box-shadow: var(--skin-btn-active-shadow);
+}
+
+.skin-card {
+  position: relative;
+  isolation: isolate;
+  border: var(--skin-card-border);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--skin-card-shadow);
+  border-radius: var(--skin-radius);
+  backdrop-filter: var(--skin-card-blur);
+  -webkit-backdrop-filter: var(--skin-card-blur);
+  overflow: hidden;
+}
+
+.skin-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.skin-card p,
+.skin-card h2 {
+  color: inherit;
+}
+
+.skin-badge {
+  display: inline-block;
+  border: var(--skin-badge-border);
+  background: var(--skin-badge-bg);
+  color: var(--skin-badge-fg);
+  font-size: var(--skin-badge-size, 11px);
+  font-weight: var(--skin-badge-weight, 800);
+  letter-spacing: var(--skin-badge-tracking, 0.08em);
+  text-transform: var(--skin-badge-transform-text, uppercase);
+  padding: 3px 8px;
+  border-radius: var(--skin-radius-sm);
+  transform: var(--skin-badge-transform);
+  backdrop-filter: var(--skin-badge-blur, none);
+  -webkit-backdrop-filter: var(--skin-badge-blur, none);
+}
+
+.skin-title {
+  transform: var(--skin-title-transform);
+  font-weight: var(--skin-title-weight, 900);
+  letter-spacing: var(--skin-title-tracking, -0.03em);
+  text-transform: var(--skin-title-text-transform, none);
+}
+
+.skin-heading {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: var(--skin-title-weight, 900);
+  letter-spacing: var(--skin-title-tracking, -0.03em);
+}
+
+.skin-brand {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: var(--skin-brand-weight, 900);
+  letter-spacing: var(--skin-brand-tracking, 0.12em);
+  text-transform: var(--skin-brand-transform, uppercase);
+}
+
+.skin-masthead {
+  position: relative;
+  z-index: 20;
+  border-bottom: var(--skin-masthead-border);
+  background: var(--skin-masthead-bg);
+  backdrop-filter: var(--skin-masthead-blur);
+  -webkit-backdrop-filter: var(--skin-masthead-blur);
+  box-shadow: var(--skin-masthead-shadow, none);
+}
+
+.skin-scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: var(--skin-scanlines-opacity);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+}
+
+.skin-muted {
+  color: var(--fog);
+  font-weight: 500;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--skin-body-bg);
+  background-attachment: var(--skin-body-attachment, scroll);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: var(--skin-body-weight, 400);
+  letter-spacing: var(--skin-body-tracking, 0);
+  -webkit-font-smoothing: antialiased;
+}
+
+.skin-rule {
+  border-top: var(--skin-rule-width, 4px) solid var(--skin-rule-color, var(--ink));
+}
+
+/* —— Y2K —— */
+
+html[data-skin="y2k"] {
+  color-scheme: light;
+  --font-sans: var(--font-y2k-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-y2k-display), var(--font-y2k-sans), ui-sans-serif, system-ui, sans-serif;
+  --ink: #0a0a12;
+  --fog: #3a3650;
+  --paper: #f4f0ff;
+  --surface: #ffffff;
+  --chrome: linear-gradient(135deg, #e8e8ef 0%, #ffffff 40%, #c8c8d8 55%, #f5f5fa 100%);
+  --hot: #ff2bd6;
+  --cyan: #2bfff0;
+  --lime: #c8ff2b;
+  --accent-ui: #ff2bd6;
+  --background: 260 40% 96%;
+  --foreground: 240 20% 6%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 20% 6%;
+  --primary: 312 100% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 180 100% 90%;
+  --secondary-foreground: 240 20% 6%;
+  --muted: 260 20% 92%;
+  --muted-foreground: 240 10% 30%;
+  --accent: 180 100% 88%;
+  --accent-foreground: 240 20% 6%;
+  --border: 240 20% 10%;
+  --input: 240 20% 10%;
+  --ring: 312 100% 58%;
+  --skin-radius: 0px;
+  --skin-radius-sm: 0px;
+  --skin-body-bg:
+    radial-gradient(800px 400px at 90% -10%, color-mix(in srgb, var(--hot) 25%, transparent), transparent 55%),
+    radial-gradient(600px 360px at 0% 30%, color-mix(in srgb, var(--cyan) 20%, transparent), transparent 50%),
+    var(--paper);
+  --skin-body-weight: 500;
+  --skin-body-tracking: 0;
+  --skin-brand-weight: 900;
+  --skin-brand-tracking: 0.14em;
+  --skin-brand-transform: uppercase;
+  --skin-title-weight: 900;
+  --skin-title-tracking: -0.02em;
+  --skin-title-text-transform: none;
+  --skin-btn-border: 2px solid var(--ink);
+  --skin-btn-bg: var(--chrome);
+  --skin-btn-shadow: 3px 3px 0 var(--ink);
+  --skin-btn-blur: none;
+  --skin-btn-hover-transform: translate(-1px, -1px);
+  --skin-btn-hover-shadow: 4px 4px 0 var(--ink);
+  --skin-btn-active-transform: translate(2px, 2px);
+  --skin-btn-active-shadow: 1px 1px 0 var(--ink);
+  --skin-card-border: 3px solid var(--ink);
+  --skin-card-shadow: 6px 6px 0 var(--hot);
+  --skin-card-blur: none;
+  --skin-badge-border: 2px solid #0a0a12;
+  --skin-badge-bg: var(--lime);
+  --skin-badge-fg: #0a0a12;
+  --skin-badge-weight: 800;
+  --skin-badge-tracking: 0.08em;
+  --skin-badge-transform-text: uppercase;
+  --skin-badge-transform: rotate(-3deg);
+  --skin-badge-blur: none;
+  --skin-title-transform: skewX(-6deg);
+  --skin-masthead-border: 4px solid var(--ink);
+  --skin-masthead-bg: var(--chrome);
+  --skin-masthead-blur: none;
+  --skin-masthead-shadow: none;
+  --skin-scanlines-opacity: 0.3;
+  --skin-rule-width: 4px;
+  --skin-rule-color: var(--ink);
+}
+
+html[data-skin="y2k"].dark {
+  color-scheme: dark;
+  --ink: #ffffff;
+  --fog: #e8e4f4;
+  --paper: #08060f;
+  --surface: #1a1628;
+  --chrome: linear-gradient(135deg, #3a3a4a 0%, #5a5a6a 35%, #2a2a34 60%, #4a4a58 100%);
+  --hot: #ff5ae8;
+  --cyan: #6dfff6;
+  --lime: #d8ff52;
+  --accent-ui: #ff5ae8;
+  --background: 260 35% 7%;
+  --foreground: 0 0% 100%;
+  --card: 260 28% 14%;
+  --card-foreground: 0 0% 100%;
+  --primary: 312 100% 65%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 180 40% 20%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 260 22% 18%;
+  --muted-foreground: 260 25% 88%;
+  --accent: 180 40% 18%;
+  --accent-foreground: 0 0% 100%;
+  --border: 0 0% 100%;
+  --input: 260 20% 45%;
+  --ring: 312 100% 65%;
+  --skin-badge-border: 2px solid #0a0a12;
+  --skin-badge-fg: #0a0a12;
+}
+
+/* —— kumooo (marketing mint) —— */
+
+html[data-skin="kumooo"] {
+  color-scheme: light;
+  --font-sans: var(--font-kumooo-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-kumooo-display), var(--font-kumooo-sans), ui-sans-serif, system-ui, sans-serif;
+  --ink: #1d1d1f;
+  --fog: #5c5c63;
+  --paper: #f5f5f7;
+  --surface: #ffffff;
+  --chrome: #ffffff;
+  --hot: #0d9488;
+  --cyan: #0f766e;
+  --lime: #ccfbf1;
+  --accent-ui: #0d9488;
+  --background: 240 5% 96%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --primary: 175 84% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 40%;
+  --accent: 175 40% 94%;
+  --accent-foreground: 240 6% 10%;
+  --border: 240 6% 88%;
+  --input: 240 6% 88%;
+  --ring: 175 84% 32%;
+  --skin-radius: 16px;
+  --skin-radius-sm: 10px;
+  --skin-body-bg:
+    radial-gradient(900px 480px at 50% -10%, rgba(13, 148, 136, 0.1), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, var(--paper) 42%, var(--paper) 100%);
+  --skin-body-weight: 400;
+  --skin-body-tracking: -0.01em;
+  --skin-brand-weight: 700;
+  --skin-brand-tracking: -0.02em;
+  --skin-brand-transform: none;
+  --skin-title-weight: 700;
+  --skin-title-tracking: -0.045em;
+  --skin-title-text-transform: none;
+  --skin-title-transform: none;
+  --skin-btn-border: 1px solid rgba(29, 29, 31, 0.14);
+  --skin-btn-bg: var(--surface);
+  --skin-btn-shadow: none;
+  --skin-btn-blur: none;
+  --skin-btn-hover-transform: none;
+  --skin-btn-hover-shadow: 0 4px 16px rgba(13, 148, 136, 0.12);
+  --skin-btn-active-transform: none;
+  --skin-btn-active-shadow: none;
+  --skin-card-border: 1px solid rgba(29, 29, 31, 0.1);
+  --skin-card-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+  --skin-card-blur: none;
+  --skin-badge-border: 0;
+  --skin-badge-bg: var(--lime);
+  --skin-badge-fg: #0f766e;
+  --skin-badge-weight: 600;
+  --skin-badge-tracking: 0.04em;
+  --skin-badge-transform-text: uppercase;
+  --skin-badge-transform: none;
+  --skin-badge-blur: none;
+  --skin-masthead-border: 1px solid rgba(29, 29, 31, 0.08);
+  --skin-masthead-bg: rgba(255, 255, 255, 0.85);
+  --skin-masthead-blur: blur(12px);
+  --skin-masthead-shadow: none;
+  --skin-scanlines-opacity: 0;
+  --skin-rule-width: 1px;
+  --skin-rule-color: rgba(29, 29, 31, 0.18);
+}
+
+html[data-skin="kumooo"].dark {
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --fog: #c4c4cc;
+  --paper: #0c0c0e;
+  --surface: #161618;
+  --chrome: #161618;
+  --hot: #6ee7b7;
+  --cyan: #6ee7b7;
+  --lime: rgba(110, 231, 183, 0.16);
+  --accent-ui: #6ee7b7;
+  --background: 240 6% 5%;
+  --foreground: 240 5% 96%;
+  --card: 240 5% 9%;
+  --card-foreground: 240 5% 96%;
+  --primary: 158 64% 62%;
+  --primary-foreground: 240 6% 5%;
+  --secondary: 240 5% 12%;
+  --secondary-foreground: 240 5% 96%;
+  --muted: 240 5% 12%;
+  --muted-foreground: 240 4% 72%;
+  --accent: 240 5% 12%;
+  --accent-foreground: 240 5% 96%;
+  --border: 240 5% 18%;
+  --input: 240 5% 18%;
+  --ring: 158 64% 62%;
+  --skin-body-bg:
+    radial-gradient(900px 480px at 50% -10%, rgba(110, 231, 183, 0.08), transparent 55%),
+    linear-gradient(180deg, #161618 0%, var(--paper) 45%, var(--paper) 100%);
+  --skin-btn-border: 1px solid rgba(245, 245, 247, 0.12);
+  --skin-btn-bg: var(--surface);
+  --skin-btn-hover-shadow: 0 4px 20px rgba(110, 231, 183, 0.1);
+  --skin-card-border: 1px solid rgba(245, 245, 247, 0.1);
+  --skin-card-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+  --skin-badge-bg: var(--lime);
+  --skin-badge-fg: #6ee7b7;
+  --skin-badge-border: 0;
+  --skin-masthead-border: 1px solid rgba(245, 245, 247, 0.08);
+  --skin-masthead-bg: rgba(12, 12, 14, 0.82);
+  --skin-rule-color: rgba(245, 245, 247, 0.16);
+}
+
+/* —— Glass (calm Apple liquid glass) —— */
+
+html[data-skin="glass"] {
+  color-scheme: light;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --ink: #1d1d1f;
+  --fog: #6e6e73;
+  --paper: #e8eef6;
+  --surface: rgba(255, 255, 255, 0.55);
+  --chrome: rgba(255, 255, 255, 0.48);
+  --hot: #0071e3;
+  --cyan: #2997ff;
+  --lime: rgba(0, 113, 227, 0.1);
+  --accent-ui: #0071e3;
+  --background: 210 30% 94%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --primary: 211 100% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 20% 96%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 240 4% 40%;
+  --accent: 210 20% 96%;
+  --accent-foreground: 240 6% 10%;
+  --border: 210 20% 88%;
+  --input: 210 20% 88%;
+  --ring: 211 100% 45%;
+  --skin-radius: 22px;
+  --skin-radius-sm: 980px;
+  --skin-body-attachment: fixed;
+  /* Soft macOS-like wash — blue only, no candy orbs */
+  --skin-body-bg:
+    radial-gradient(ellipse 70% 55% at 50% -20%, rgba(120, 170, 255, 0.45), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 60%, rgba(180, 210, 255, 0.35), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 0% 80%, rgba(200, 220, 255, 0.4), transparent 50%),
+    linear-gradient(180deg, #f2f5fa 0%, #e4ebf5 45%, #d8e2f0 100%);
+  --skin-body-weight: 400;
+  --skin-body-tracking: -0.011em;
+  --skin-brand-weight: 600;
+  --skin-brand-tracking: -0.028em;
+  --skin-brand-transform: none;
+  --skin-title-weight: 600;
+  --skin-title-tracking: -0.05em;
+  --skin-title-text-transform: none;
+  --skin-title-transform: none;
+  --skin-btn-border: 0.5px solid rgba(255, 255, 255, 0.7);
+  --skin-btn-bg: rgba(255, 255, 255, 0.42);
+  --skin-btn-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.06),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.85);
+  --skin-btn-blur: blur(20px) saturate(140%);
+  --skin-btn-hover-transform: none;
+  --skin-btn-hover-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 28px rgba(0, 113, 227, 0.1),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
+  --skin-btn-active-transform: scale(0.98);
+  --skin-btn-active-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.7);
+  --skin-card-border: 0.5px solid rgba(255, 255, 255, 0.75);
+  --skin-card-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 18px 40px rgba(15, 23, 42, 0.08),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9);
+  --skin-card-blur: blur(40px) saturate(150%);
+  --skin-badge-border: 0.5px solid rgba(255, 255, 255, 0.65);
+  --skin-badge-bg: rgba(255, 255, 255, 0.4);
+  --skin-badge-fg: #1d1d1f;
+  --skin-badge-weight: 500;
+  --skin-badge-tracking: 0.01em;
+  --skin-badge-transform-text: none;
+  --skin-badge-transform: none;
+  --skin-badge-blur: blur(12px) saturate(130%);
+  --skin-badge-size: 12px;
+  --skin-masthead-border: 0.5px solid rgba(255, 255, 255, 0.65);
+  --skin-masthead-bg: rgba(255, 255, 255, 0.4);
+  --skin-masthead-blur: blur(36px) saturate(150%);
+  --skin-masthead-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  --skin-scanlines-opacity: 0;
+  --skin-rule-width: 0.5px;
+  --skin-rule-color: rgba(29, 29, 31, 0.12);
+}
+
+html[data-skin="glass"].dark {
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --fog: #a1a1a6;
+  --paper: #000000;
+  --surface: rgba(40, 40, 45, 0.55);
+  --chrome: rgba(40, 40, 45, 0.5);
+  --hot: #0a84ff;
+  --cyan: #64d2ff;
+  --lime: rgba(10, 132, 255, 0.16);
+  --accent-ui: #0a84ff;
+  --background: 240 6% 5%;
+  --foreground: 240 5% 96%;
+  --card: 240 5% 10%;
+  --card-foreground: 240 5% 96%;
+  --primary: 211 100% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 14%;
+  --secondary-foreground: 240 5% 96%;
+  --muted: 240 5% 14%;
+  --muted-foreground: 240 4% 70%;
+  --accent: 240 5% 14%;
+  --accent-foreground: 240 5% 96%;
+  --border: 240 5% 20%;
+  --input: 240 5% 20%;
+  --ring: 211 100% 52%;
+  --skin-body-bg:
+    radial-gradient(ellipse 65% 50% at 50% -15%, rgba(10, 132, 255, 0.28), transparent 58%),
+    radial-gradient(ellipse 45% 35% at 95% 70%, rgba(41, 151, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #0c0c0e 0%, #000000 55%, #050508 100%);
+  --skin-btn-border: 0.5px solid rgba(255, 255, 255, 0.14);
+  --skin-btn-bg: rgba(255, 255, 255, 0.08);
+  --skin-btn-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.18);
+  --skin-btn-hover-shadow:
+    0 10px 32px rgba(10, 132, 255, 0.15),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.22);
+  --skin-card-border: 0.5px solid rgba(255, 255, 255, 0.14);
+  --skin-card-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.45),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.16);
+  --skin-card-blur: blur(44px) saturate(140%);
+  --skin-badge-border: 0.5px solid rgba(255, 255, 255, 0.12);
+  --skin-badge-bg: rgba(255, 255, 255, 0.08);
+  --skin-badge-fg: #f5f5f7;
+  --skin-masthead-border: 0.5px solid rgba(255, 255, 255, 0.1);
+  --skin-masthead-bg: rgba(28, 28, 30, 0.55);
+  --skin-masthead-blur: blur(40px) saturate(140%);
+  --skin-masthead-shadow: none;
+  --skin-rule-color: rgba(245, 245, 247, 0.1);
+}
+
+/* Soft top highlight only — no loud specular wash */
+html[data-skin="glass"] .skin-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 42%);
+  opacity: 0.7;
+}
+
+html[data-skin="glass"].dark .skin-card::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 40%);
+  opacity: 1;
+}
+
+/* Demo top banner stays readable but quieter on glass */
+html[data-skin="glass"] body > div:first-child {
+  background: rgba(0, 113, 227, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: transparent !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kumooo-hosted-site",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-07-01",
+  "workers_dev": true,
+  "vars": {
+    "API_ORIGIN": "https://api.example.com",
+    "SITE_SUFFIX": "example.com"
+  },
+  "services": [
+    { "binding": "API", "service": "kumooo-api" }
+  ]
+}
